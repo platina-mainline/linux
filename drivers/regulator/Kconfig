@@ -1135,6 +1135,17 @@ config REGULATOR_PWM
 	  This driver supports PWM controlled voltage regulators. PWM
 	  duty cycle can increase or decrease the voltage.
 
+config REGULATOR_QCOM_LCDB
+	tristate "Qualcomm LCDB regulator driver"
+	depends on SPMI || COMPILE_TEST
+	help
+	  If you say yes to this option, support will be included for the
+	  LCDB regulators found in Qualcomm SPMI PMICs such as PM660L.
+
+	  Say M here if you want to include support for the regulators on the
+	  Qualcomm SPMI PMICs as a module. The module will be named
+	  "qpnp-lcdb-regulator".
+
 config REGULATOR_QCOM_PM8008
 	tristate "Qualcomm PM8008 PMIC regulators"
 	depends on MFD_QCOM_PM8008

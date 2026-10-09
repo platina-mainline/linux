@@ -16,6 +16,7 @@
 #include "testmode.h"
 #include "txrx.h"
 #include <linux/bitfield.h>
+#include <linux/of.h>
 
 /***************/
 /* TLV helpers */
@@ -2025,7 +2026,11 @@ ath10k_wmi_tlv_op_gen_start_scan(struct ath10k *ar,
 	 * e.g. WMI-TLV inverts the logic behind the following flag.
 	 */
 	cmd->common.scan_ctrl_flags ^= __cpu_to_le32(WMI_SCAN_FILTER_PROBE_REQ);
-
+	/* Keep the SDM660 / platina vendor scan flags. */
+	if (of_machine_is_compatible("qcom,sdm660")) {
+		cmd->common.scan_ctrl_flags &= __cpu_to_le32(~WMI_SCAN_CHAN_STAT_EVENT);
+		cmd->common.scan_ctrl_flags |= __cpu_to_le32(0x200c00);
+	}
 	ptr += sizeof(*tlv);
 	ptr += sizeof(*cmd);
 

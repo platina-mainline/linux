@@ -84,7 +84,7 @@ config DRM_PANEL_BOE_TD4320
 	depends on DRM_MIPI_DSI
 	depends on BACKLIGHT_CLASS_DEVICE
 	help
-	  Say Y here if you want to enable support for BOE TD4320 1080x2340
+	  Say Y here if you want to enable support for BOE TD4320 1080x2280
 	  video mode panel found in Xiaomi Redmi Note 7 smartphones.
 
 config DRM_PANEL_BOE_TH101MB31UIG002_28A

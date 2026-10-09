@@ -281,6 +281,7 @@ config SND_SOC_ALL_CODECS
 	imply SND_SOC_TAS6424
 	imply SND_SOC_TAS675X
 	imply SND_SOC_TDA7419
+	imply SND_SOC_TFA9894
 	imply SND_SOC_TFA9879
 	imply SND_SOC_TFA989X
 	imply SND_SOC_TLV320ADC3XXX
@@ -2302,6 +2303,16 @@ config SND_SOC_TFA989X
 	  amplifiers, e.g. TFA9895.
 	  Note that the driver currently bypasses the built-in "CoolFlux DSP"
 	  and does not support (hardware) volume control.
+
+config SND_SOC_TFA9894
+	tristate "NXP/Goodix TFA9894 speaker amplifier"
+	depends on I2C && GPIOLIB && OF
+	select REGMAP_I2C
+	help
+	  Enable support for the NXP (now Goodix) TFA9894 smart speaker
+	  amplifier.
+	  The TFA9894 requires a matching firmware container to initialize
+	  its CoolFlux DSP and speaker protection before playback.
 
 config SND_SOC_TLV320ADC3XXX
 	tristate "Texas Instruments TLV320ADC3001/3101 audio ADC"

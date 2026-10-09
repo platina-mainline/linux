@@ -15,14 +15,24 @@
 #include <dt-bindings/input/gpio-keys.h>
 #include <dt-bindings/leds/common.h>
 #include <dt-bindings/pinctrl/qcom,pmic-gpio.h>
+#include <dt-bindings/sound/qcom,q6asm.h>
+#include <dt-bindings/sound/qcom,q6afe.h>
+
+/delete-node/ &adsp_region;
+/delete-node/ &mba_region;
+/delete-node/ &cdsp_region;
 
 / {
 	model = "Xiaomi Mi 8 Lite";
 	compatible = "xiaomi,platina", "qcom,sdm660";
+	qcom,msm-id = <0x13d 0x00>;
+	qcom,board-id = <0x22 0x00>;
+	qcom,pmic-id = <0x1001b 0x101011a 0x00 0x00 0x1001b 0x201011a 0x00 0x00>;
 	chassis-type = "handset";
 
 	aliases {
 		serial0 = &blsp1_uart2;
+		serial1 = &blsp2_uart1;
 	};
 
 	chosen {
@@ -35,6 +45,12 @@
 		framebuffer@9d400000 {
 			compatible = "simple-framebuffer";
 			reg = <0x0 0x9d400000 0x0 (1080 * 2280 * 4)>;
+			/* Keep shared MDSS clocks owned while firmware scanout is used. */
+			clocks = <&mmcc MDSS_AHB_CLK>,
+				 <&mmcc MDSS_AXI_CLK>,
+				 <&mmcc MDSS_VSYNC_CLK>;
+			/* Keep the display domain powered while firmware scanout is used. */
+			power-domains = <&mmcc MDSS_GDSC>;
 			width = <1080>;
 			height = <2280>;
 			stride = <(1080 * 4)>;
@@ -63,7 +79,17 @@
 			no-map;
 		};
 
-		cdsp-region@94e00000 {
+		adsp_region: adsp@92a00000 {
+			reg = <0x0 0x92a00000 0x0 0x2200000>;
+			no-map;
+		};
+
+		mba_region: mba@94c00000 {
+			reg = <0x0 0x94c00000 0x0 0x200000>;
+			no-map;
+		};
+
+		cdsp_region: cdsp@94e00000 {
 			reg = <0x00 0x94e00000 0x00 0x600000>;
 			no-map;
 		};
@@ -77,6 +103,15 @@
 			reg = <0x0 0x9d400000 0x0 (1080 * 2280 * 4)>;
 			no-map;
 		};
+	};
+
+	spk_id_pin: speaker-id {
+		compatible = "audio,speaker-id";
+		audio,speaker-id-gpios = <&tlmm 113 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "pull_down", "pull_up", "no_pull";
+		pinctrl-0 = <&speaker_id_pull_down>;
+		pinctrl-1 = <&speaker_id_pull_up>;
+		pinctrl-2 = <&speaker_id_no_pull>;
 	};
 
 	board_vbat: vbat-regulator {
@@ -236,11 +271,22 @@
 };
 
 &adreno_gpu {
-	status = "disabled";
+	status = "okay";
 };
 
 &blsp_i2c2 {
 	status = "okay";
+
+	/* TFA9894 on the secondary MI2S speaker bus. */
+	speaker_amp: audio-codec@34 {
+		compatible = "nxp,tfa98xx";
+		reg = <0x34>;
+		#sound-dai-cells = <0>;
+		reset-gpios = <&tlmm 43 GPIO_ACTIVE_HIGH>;
+		irq-gpios = <&tlmm 48 GPIO_ACTIVE_HIGH>;
+		nxp,spk-id-pin = <&spk_id_pin>;
+		status = "okay";
+	};
 
 	/*
 	 * Two instances of SMB1355 charger: 0x8, 0xc but only
@@ -253,6 +299,8 @@
 	status = "okay";
 
 	touchscreen@1 {
+		/* Probe changes reset/shared IOVCC, disrupting bootloader display. */
+		status = "disabled";
 		compatible = "novatek,nt36672a-ts";
 		reg = <0x1>;
 		iovcc-supply = <&vreg_l11a_1p8>;
@@ -269,12 +317,28 @@
 	status = "okay";
 };
 
+&blsp2_uart1 {
+	status = "okay";
+
+	bluetooth {
+		compatible = "qcom,wcn3988-bt";
+		/* VDD_IO follows other SDM660 Xiaomi boards; verify on platina. */
+		vddio-supply = <&vreg_l13a_1p8>;
+		vddxo-supply = <&vreg_l9a_1p8>;
+		vddrf-supply = <&vreg_l6a_1p3>;
+		vddch0-supply = <&vreg_l19a_3p3>;
+		firmware-name = "apnv11.bin", "apbtfw11.tlv";
+		max-speed = <3200000>;
+		status = "okay";
+	};
+};
+
 &gpucc {
-	status = "disabled";
+	status = "okay";
 };
 
 &mmcc {
-	status = "disabled";
+	status = "okay";
 };
 
 &pm660_gpios {
@@ -574,9 +638,9 @@
 			regulator-system-load = <14000>;
 		};
 
-		vreg_l11a_1p8: l11 {
-			regulator-min-microvolt = <1784000>;
-			regulator-max-microvolt = <1944000>;
+	vreg_l11a_1p8: l11 {
+			regulator-min-microvolt = <1800000>;
+			regulator-max-microvolt = <1800000>;
 			regulator-enable-ramp-delay = <250>;
 			regulator-ramp-delay = <0>;
 		};
@@ -658,8 +722,116 @@
 	status = "disabled";
 };
 
+&pm660l_wled {
+	qcom,switching-freq = <800>;
+	qcom,current-limit-microamp = <20000>;
+	qcom,num-strings = <2>;
+
+	status = "okay";
+};
+
+&mdss_dsi0 {
+	status = "okay";
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	vdd-supply = <&vreg_l1b_0p925>;
+	vdda-supply = <&vreg_l1a_1p225>;
+
+	panel: panel@0 {
+		status = "okay";
+		compatible = "boe,td4320";
+		reg = <0>;
+
+		/* Keep bootloader panel setup; add reset-gpios for full initialization. */
+		te-gpios = <&tlmm 59 GPIO_ACTIVE_LOW>;
+
+		backlight = <&pm660l_wled>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&panel_reset_n &mdp_vsync_n>;
+
+		iovcc-supply = <&vreg_l11a_1p8>;
+		vsn-supply = <&lcdb_ncp_vreg>;
+		vsp-supply = <&lcdb_ldo_vreg>;
+
+		port {
+			panel_in: endpoint {
+				remote-endpoint = <&mdss_dsi0_out>;
+			};
+		};
+	};
+};
+
+&mdss_dsi0_phy {
+    vcca-supply = <&vreg_l1b_0p925>;
+    status = "okay";
+};
+
+&mdss_dsi0_out {
+	data-lanes = <0 1 2 3>;
+	remote-endpoint = <&panel_in>;
+};
+
+&remoteproc_mss {
+	firmware-name = "mba.mbn", "modem.mdt";
+	status = "okay";
+};
+
+&wifi {
+	vdd-0.8-cx-mx-supply = <&vreg_l5a_0p848>;
+	vdd-1.8-xo-supply = <&vreg_l9a_1p8>;
+	vdd-1.3-rfa-supply = <&vreg_l6a_1p3>;
+	vdd-3.3-ch0-supply = <&vreg_l19a_3p3>;
+
+	status = "okay";
+};
+
 &tlmm {
 	gpio-reserved-ranges = <8 4>;
+
+	speaker_id_pull_down: speaker-id-pull-down-state {
+		pins = "gpio113";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-pull-down;
+		input-enable;
+	};
+
+	speaker_id_pull_up: speaker-id-pull-up-state {
+		pins = "gpio113";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-pull-up;
+		input-enable;
+	};
+
+	speaker_id_no_pull: speaker-id-no-pull-state {
+		pins = "gpio113";
+		function = "gpio";
+		drive-strength = <8>;
+		bias-disable;
+		input-enable;
+	};
+
+	sec_mi2s_default: sec-mi2s-default-state {
+		clk-ws-pins {
+			pins = "gpio24", "gpio25";
+			function = "sec_mi2s";
+			drive-strength = <8>;
+			bias-disable;
+			output-high;
+		};
+
+		sd0-pins {
+			pins = "gpio26";
+			function = "sec_mi2s";
+			drive-strength = <8>;
+			bias-disable;
+			output-high;
+		};
+	};
 
 	camera_rear_default: camera-rear-default-state {
 		mclk0-pins {
@@ -777,7 +949,6 @@
 
 &usb3 {
 	qcom,select-utmi-as-pipe-clk;
-
 	status = "okay";
 };
 
@@ -788,4 +959,149 @@
 
 	dr_mode = "peripheral";
 	extcon = <&extcon_usb>;
+};
+
+&mdss {
+	/* Keep the bootloader display state until MSM starts its own scanout. */
+	/delete-property/ resets;
+	status = "okay";
+};
+
+&mmss_smmu {
+	status = "okay";
+};
+
+
+&adsp_pil {
+	firmware-name = "audio/adsp_d2t.mdt";
+	status = "okay";
+};
+
+&lpass_codec {
+	status = "okay";
+};
+
+&pm660l_codec {
+	vdd-cdc-io-supply = <&vreg_s4a_2p04>;
+	vdd-cdc-tx-rx-cx-supply = <&vreg_s4a_2p04>;
+	vdd-micbias-supply = <&vreg_l7b_3p125>;
+
+	qcom,micbias-lvl = <2600>;
+	qcom,micbias1-ext-cap;
+
+	status = "okay";
+};
+
+&sound {
+	compatible = "qcom,sdm660-sndcard";
+	model = "Xiaomi Platina";
+
+	pinctrl-0 = <&cdc_pdm_default>,
+			<&cdc_dmic_default>,
+			<&sec_mi2s_default>;
+	pinctrl-names = "default";
+
+	widgets = "Speaker", "Speaker";
+	pin-switches = "Speaker";
+
+	audio-routing = "PDM_RX1", "Digital PDM_RX1",
+			"PDM_RX2", "Digital PDM_RX2",
+			"PDM_RX3", "Digital PDM_RX3",
+			"Digital LPASS_PDM_TX", "PDM_TX",
+			"AMIC1", "MIC BIAS External1",
+			"AMIC2", "MIC BIAS External2",
+			"Speaker", "OUTL";
+
+	mm1-dai-link {
+		link-name = "MultiMedia1";
+
+		cpu {
+			sound-dai = <&q6asmdai MSM_FRONTEND_DAI_MULTIMEDIA1>;
+		};
+	};
+
+	mm2-dai-link {
+		link-name = "MultiMedia2";
+
+		cpu {
+			sound-dai = <&q6asmdai MSM_FRONTEND_DAI_MULTIMEDIA2>;
+		};
+	};
+
+	int0-mi2s-dai-link {
+		link-name = "Internal MI2S Playback";
+
+		cpu {
+			sound-dai = <&q6afedai LPI_MI2S_RX_0>;
+		};
+
+		platform {
+			sound-dai = <&q6routing>;
+		};
+
+		codec {
+			sound-dai = <&pm660l_codec 0>,
+					<&lpass_codec 0>;
+		};
+	};
+
+	int3-mi2s-dai-link {
+		link-name = "Internal MI2S Capture";
+
+		cpu {
+			sound-dai = <&q6afedai LPI_MI2S_TX_3>;
+		};
+
+		platform {
+			sound-dai = <&q6routing>;
+		};
+
+		codec {
+			sound-dai = <&pm660l_codec 1>,
+					<&lpass_codec 1>;
+		};
+	};
+
+	speaker-mi2s-dai-link {
+		link-name = "Speaker MI2S Playback";
+
+		cpu {
+			sound-dai = <&q6afedai SECONDARY_MI2S_RX>;
+		};
+
+		platform {
+			sound-dai = <&q6routing>;
+		};
+
+		codec {
+			sound-dai = <&speaker_amp>;
+		};
+	};
+};
+
+&q6afedai {
+	dai@12 {
+		reg = <SECONDARY_MI2S_RX>;
+		qcom,sd-lines = <0>;
+	};
+
+	dai@89 {
+		reg = <LPI_MI2S_RX_0>;
+		qcom,sd-lines = <0 1>;
+	};
+
+	dai@90 {
+		reg = <LPI_MI2S_TX_3>;
+		qcom,sd-lines = <0 1>;
+	};
+};
+
+&q6asmdai {
+	dai@0 {
+		reg = <0>;
+	};
+
+	dai@1 {
+		reg = <1>;
+	};
 };

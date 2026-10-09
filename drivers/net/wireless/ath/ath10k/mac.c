@@ -3207,7 +3207,11 @@ static void ath10k_bss_disassoc(struct ieee80211_hw *hw,
 
 	arvif->def_wep_key_idx = -1;
 
-	ret = ath10k_mac_vif_recalc_txbf(ar, vif, vht_cap);
+	/* WCN3990 firmware may crash if TXBF is reset after DOWN. */
+	ret = 0;
+	if (ar->hw_rev != ATH10K_HW_WCN3990 ||
+	    vif->type != NL80211_IFTYPE_STATION)
+		ret = ath10k_mac_vif_recalc_txbf(ar, vif, vht_cap);
 	if (ret) {
 		ath10k_warn(ar, "failed to recalc txbf for vdev %i: %d\n",
 			    arvif->vdev_id, ret);

@@ -1847,17 +1847,30 @@ struct wmi_scan_prob_req_oui_cmd {
 	__le32 prob_req_oui;
 }  __packed;
 
+#define WMI_TLV_SCAN_IE_BITMAP_SIZE 8
+
 struct wmi_tlv_start_scan_cmd {
 	struct wmi_start_scan_common common;
+
 	__le32 burst_duration_ms;
 	__le32 num_channels;
 	__le32 num_bssids;
 	__le32 num_ssids;
 	__le32 ie_len;
 	__le32 num_probes;
+
 	struct wmi_mac_addr mac_addr;
 	struct wmi_mac_addr mac_mask;
+
+	/*
+	 * Extended START_SCAN fields used by the WLAN.HL/qcacld-3.0
+	 * firmware shipped on this platform.
+	 */
+	__le32 ie_bitmap[WMI_TLV_SCAN_IE_BITMAP_SIZE];
+	__le32 num_vendor_oui;
+	__le32 scan_ctrl_flags_ext;
 } __packed;
+
 
 enum wmi_tlv_vdev_subtype {
 	WMI_TLV_VDEV_SUBTYPE_NONE	= 0,

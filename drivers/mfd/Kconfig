@@ -2559,6 +2559,13 @@ config MFD_UPBOARD_FPGA
 	  To compile this driver as a module, choose M here: the module will be
 	  called upboard-fpga.
 
+config MFD_SPKID
+    tristate "Speaker ID detection"
+    depends on OF && GPIOLIB
+    help
+      Speaker identification support for the device.
+
+
 config MFD_MAX7360
 	tristate "Maxim MAX7360 I2C IO Expander"
 	depends on I2C

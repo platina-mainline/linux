@@ -10,7 +10,11 @@ maintainers:
   - Barnabas Czeman <barnabas.czeman@mainlining.org>
 
 description:
-  BOE TD4320 6.3" 1080x2340 panel found in Xiaomi Redmi Note 7 smartphone.
+  BOE TD4320 panels found in Xiaomi Redmi Note 7 and Xiaomi Mi 8 Lite
+  smartphones. Without reset-gpios, the panel must already be initialized
+  and powered by the bootloader. The driver then preserves the panel's
+  power, reset, backlight and command state while the display controller
+  starts its own scanout.
 
 allOf:
   - $ref: panel-common.yaml#
@@ -22,6 +26,13 @@ properties:
 
   reg:
     maxItems: 1
+
+  reset-gpios:
+    maxItems: 1
+    description:
+      Active-low panel reset. Providing this property enables driver-managed
+      power, reset and full command initialization. Omitting it preserves
+      the bootloader-initialized panel state.
 
   iovcc-supply:
     description: I/O voltage rail
@@ -35,7 +46,6 @@ properties:
 required:
   - compatible
   - reg
-  - reset-gpios
   - port
 
 unevaluatedProperties: false

@@ -1731,11 +1731,6 @@
 				interrupt-parent = <&mdss>;
 				interrupts = <4>;
 
-				assigned-clocks = <&mmcc BYTE0_CLK_SRC>,
-						  <&mmcc PCLK0_CLK_SRC>;
-				assigned-clock-parents = <&mdss_dsi0_phy DSI_BYTE_PLL_CLK>,
-							 <&mdss_dsi0_phy DSI_PIXEL_PLL_CLK>;
-
 				clocks = <&mmcc MDSS_MDP_CLK>,
 					 <&mmcc MDSS_BYTE0_CLK>,
 					 <&mmcc MDSS_BYTE0_INTF_CLK>,
@@ -1744,7 +1739,11 @@
 					 <&mmcc MDSS_AXI_CLK>,
 					 <&mmcc MISC_AHB_CLK>,
 					 <&mmcc MDSS_PCLK0_CLK>,
-					 <&mmcc MDSS_ESC0_CLK>;
+					 <&mmcc MDSS_ESC0_CLK>,
+					 <&mmcc BYTE0_CLK_SRC>,
+					 <&mmcc PCLK0_CLK_SRC>,
+					 <&mdss_dsi0_phy DSI_BYTE_PLL_CLK>,
+					 <&mdss_dsi0_phy DSI_PIXEL_PLL_CLK>;
 				clock-names = "mdp_core",
 					      "byte",
 					      "byte_intf",
@@ -1753,7 +1752,11 @@
 					      "bus",
 					      "core_mmss",
 					      "pixel",
-					      "core";
+					      "core",
+					      "byte_src",
+					      "pixel_src",
+					      "dsi_pll_byte",
+					      "dsi_pll_pixel";
 
 				phys = <&mdss_dsi0_phy>;
 

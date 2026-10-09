@@ -1,0 +1,82 @@
+# SPDX-License-Identifier: (GPL-2.0-only)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/sound/nxp,tfa9894.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: NXP/Goodix TFA9894 smart speaker amplifier
+
+maintainers:
+  - David Heidelberg <david@ixit.cz>
+
+description:
+  The TFA9894 is an I2C-controlled class-D speaker amplifier with an
+  integrated CoolFlux DSP. A three-state GPIO selects the speaker firmware.
+
+allOf:
+  - $ref: dai-common.yaml#
+
+properties:
+  compatible:
+    enum:
+      - nxp,tfa9894
+
+  reg:
+    maxItems: 1
+
+  reset-gpios:
+    maxItems: 1
+
+  speaker-id-gpios:
+    maxItems: 1
+    description: Three-state GPIO used to select the speaker vendor firmware.
+
+  pinctrl-names:
+    items:
+      - const: pull_down
+      - const: pull_up
+      - const: no_pull
+
+  pinctrl-0: true
+  pinctrl-1: true
+  pinctrl-2: true
+
+  '#sound-dai-cells':
+    const: 0
+
+required:
+  - compatible
+  - reg
+  - '#sound-dai-cells'
+  - reset-gpios
+  - speaker-id-gpios
+  - pinctrl-names
+  - pinctrl-0
+  - pinctrl-1
+  - pinctrl-2
+
+dependencies:
+  speaker-id-gpios: [pinctrl-0, pinctrl-1, pinctrl-2]
+
+unevaluatedProperties: false
+
+examples:
+  - |
+    #include <dt-bindings/gpio/gpio.h>
+
+    i2c {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        audio-codec@34 {
+            compatible = "nxp,tfa9894";
+            reg = <0x34>;
+            reset-gpios = <&tlmm 43 GPIO_ACTIVE_HIGH>;
+            speaker-id-gpios = <&tlmm 113 GPIO_ACTIVE_HIGH>;
+            pinctrl-names = "pull_down", "pull_up", "no_pull";
+            pinctrl-0 = <&speaker_id_pull_down>;
+            pinctrl-1 = <&speaker_id_pull_up>;
+            pinctrl-2 = <&speaker_id_no_pull>;
+            #sound-dai-cells = <0>;
+        };
+    };
