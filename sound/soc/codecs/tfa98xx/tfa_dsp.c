@@ -92,7 +92,7 @@ int tfa_get_tap_pattern(struct tfa_device *tfa)
 /*
  * interrupt bit function to clear
  */
-int tfa_irq_clear(struct tfa_device *tfa, enum tfa9912_irq bit)
+int tfa_irq_clear(struct tfa_device *tfa, int bit)
 {
 	unsigned char reg;
 
@@ -112,7 +112,7 @@ int tfa_irq_clear(struct tfa_device *tfa, enum tfa9912_irq bit)
 /*
  * return state of irq or -1 if illegal bit
  */
-int tfa_irq_get(struct tfa_device *tfa, enum tfa9912_irq bit)
+int tfa_irq_get(struct tfa_device *tfa, int bit)
 {
 	uint16_t value;
 	int reg, mask;
@@ -131,7 +131,7 @@ int tfa_irq_get(struct tfa_device *tfa, enum tfa9912_irq bit)
  * interrupt bit function that operates on the shadow regs in the handle
  */
 
-int tfa_irq_ena(struct tfa_device *tfa, enum tfa9912_irq bit, int state)
+int tfa_irq_ena(struct tfa_device *tfa, int bit, int state)
 {
 	uint16_t value, new_value;
 	int reg=0, mask;
@@ -193,7 +193,7 @@ int tfa_irq_unmask(struct tfa_device *tfa)
  * interrupt bit function that sets the polarity
  */
 
-int tfa_irq_set_pol(struct tfa_device *tfa, enum tfa9912_irq bit, int state)
+int tfa_irq_set_pol(struct tfa_device *tfa, int bit, int state)
 {
 	uint16_t value, new_value;
 	int reg=0, mask;
