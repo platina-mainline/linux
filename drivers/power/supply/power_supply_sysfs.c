@@ -58,6 +58,7 @@ static const char * const POWER_SUPPLY_TYPE_TEXT[] = {
 	[POWER_SUPPLY_TYPE_USB_PD_DRP]		= "USB_PD_DRP",
 	[POWER_SUPPLY_TYPE_APPLE_BRICK_ID]	= "BrickID",
 	[POWER_SUPPLY_TYPE_WIRELESS]		= "Wireless",
+	[POWER_SUPPLY_TYPE_BMS]			= "BMS",
 };
 
 static const char * const POWER_SUPPLY_USB_TYPE_TEXT[] = {
@@ -93,6 +94,7 @@ static const char * const POWER_SUPPLY_CHARGE_TYPE_TEXT[] = {
 	[POWER_SUPPLY_CHARGE_TYPE_CUSTOM]	= "Custom",
 	[POWER_SUPPLY_CHARGE_TYPE_LONGLIFE]	= "Long Life",
 	[POWER_SUPPLY_CHARGE_TYPE_BYPASS]	= "Bypass",
+	[POWER_SUPPLY_CHARGE_TYPE_TAPER]	= "Taper",
 };
 
 static const char * const POWER_SUPPLY_HEALTH_TEXT[] = {
@@ -231,6 +233,9 @@ static struct power_supply_attr power_supply_attrs[] __ro_after_init = {
 	POWER_SUPPLY_ATTR(MODEL_NAME),
 	POWER_SUPPLY_ATTR(MANUFACTURER),
 	POWER_SUPPLY_ATTR(SERIAL_NUMBER),
+#define QCOM_POWER_SUPPLY_PROPERTY_ATTR(_name) POWER_SUPPLY_ATTR(_name),
+	QCOM_POWER_SUPPLY_PROPERTIES(QCOM_POWER_SUPPLY_PROPERTY_ATTR)
+#undef QCOM_POWER_SUPPLY_PROPERTY_ATTR
 };
 #define POWER_SUPPLY_ATTR_CNT ARRAY_SIZE(power_supply_attrs)
 
@@ -397,6 +402,7 @@ static ssize_t power_supply_format_property(struct device *dev,
 						     value.intval, buf);
 		break;
 	case POWER_SUPPLY_PROP_MODEL_NAME ... POWER_SUPPLY_PROP_SERIAL_NUMBER:
+	case POWER_SUPPLY_PROP_BATTERY_TYPE:
 		ret = sysfs_emit(buf, "%s\n", value.strval);
 		break;
 	default:

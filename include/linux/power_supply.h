@@ -19,6 +19,7 @@
 #include <linux/list.h>
 #include <linux/spinlock.h>
 #include <linux/notifier.h>
+#include <linux/power/qcom/power-supply-extensions.h>
 
 /*
  * All voltages, currents, charges, energies, time and temperatures in uV,
@@ -52,6 +53,9 @@ enum power_supply_charge_type {
 	POWER_SUPPLY_CHARGE_TYPE_CUSTOM,	/* use CHARGE_CONTROL_* props */
 	POWER_SUPPLY_CHARGE_TYPE_LONGLIFE,	/* slow speed, longer life */
 	POWER_SUPPLY_CHARGE_TYPE_BYPASS,	/* bypassing the charger */
+#define QCOM_POWER_SUPPLY_CHARGE_TYPE_ENUM(_name) POWER_SUPPLY_CHARGE_TYPE_ ## _name,
+	QCOM_POWER_SUPPLY_CHARGE_TYPES(QCOM_POWER_SUPPLY_CHARGE_TYPE_ENUM)
+#undef QCOM_POWER_SUPPLY_CHARGE_TYPE_ENUM
 };
 
 enum {
@@ -182,6 +186,9 @@ enum power_supply_property {
 	POWER_SUPPLY_PROP_MODEL_NAME,
 	POWER_SUPPLY_PROP_MANUFACTURER,
 	POWER_SUPPLY_PROP_SERIAL_NUMBER,
+#define QCOM_POWER_SUPPLY_PROPERTY_ENUM(_name) POWER_SUPPLY_PROP_ ## _name,
+	QCOM_POWER_SUPPLY_PROPERTIES(QCOM_POWER_SUPPLY_PROPERTY_ENUM)
+#undef QCOM_POWER_SUPPLY_PROPERTY_ENUM
 };
 
 enum power_supply_type {
@@ -198,6 +205,9 @@ enum power_supply_type {
 	POWER_SUPPLY_TYPE_USB_PD_DRP,		/* PD Dual Role Port */
 	POWER_SUPPLY_TYPE_APPLE_BRICK_ID,	/* Apple Charging Method */
 	POWER_SUPPLY_TYPE_WIRELESS,		/* Wireless */
+#define QCOM_POWER_SUPPLY_TYPE_ENUM(_name) POWER_SUPPLY_TYPE_ ## _name,
+	QCOM_POWER_SUPPLY_TYPES(QCOM_POWER_SUPPLY_TYPE_ENUM)
+#undef QCOM_POWER_SUPPLY_TYPE_ENUM
 };
 
 enum power_supply_usb_type {
