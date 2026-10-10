@@ -52,6 +52,16 @@ static const struct __extcon_info {
 		.id = EXTCON_USB_HOST,
 		.name = "USB-HOST",
 	},
+	[EXTCON_USB_CC] = {
+		.type = EXTCON_TYPE_USB,
+		.id = EXTCON_USB_CC,
+		.name = "USB-CC",
+	},
+	[EXTCON_USB_SPEED] = {
+		.type = EXTCON_TYPE_USB,
+		.id = EXTCON_USB_SPEED,
+		.name = "USB-SPEED",
+	},
 
 	/* Charging external connector */
 	[EXTCON_CHG_USB_SDP] = {

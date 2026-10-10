@@ -12,6 +12,7 @@
  */
 
 #include <linux/debugfs.h>
+#include <linux/module.h>
 #include <linux/spinlock.h>
 #include <linux/errno.h>
 #include <linux/bitops.h>
@@ -706,3 +707,35 @@ void destroy_votable(struct votable *votable)
 	kfree(votable->name);
 	kfree(votable);
 }
+
+EXPORT_SYMBOL_GPL(is_client_vote_enabled);
+EXPORT_SYMBOL_GPL(is_client_vote_enabled_locked);
+EXPORT_SYMBOL_GPL(get_client_vote);
+EXPORT_SYMBOL_GPL(get_client_vote_locked);
+EXPORT_SYMBOL_GPL(get_effective_result);
+EXPORT_SYMBOL_GPL(get_effective_result_locked);
+EXPORT_SYMBOL_GPL(get_effective_client);
+EXPORT_SYMBOL_GPL(get_effective_client_locked);
+EXPORT_SYMBOL_GPL(vote);
+EXPORT_SYMBOL_GPL(rerun_election);
+EXPORT_SYMBOL_GPL(find_votable);
+EXPORT_SYMBOL_GPL(create_votable);
+EXPORT_SYMBOL_GPL(destroy_votable);
+EXPORT_SYMBOL_GPL(lock_votable);
+EXPORT_SYMBOL_GPL(unlock_votable);
+
+static int __init pmic_voter_init(void)
+{
+	debug_root = debugfs_create_dir("pmic-votable", NULL);
+	return PTR_ERR_OR_ZERO(debug_root);
+}
+module_init(pmic_voter_init);
+
+static void __exit pmic_voter_exit(void)
+{
+	debugfs_remove_recursive(debug_root);
+}
+module_exit(pmic_voter_exit);
+
+MODULE_DESCRIPTION("QCOM PMIC voter");
+MODULE_LICENSE("GPL v2");

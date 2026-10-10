@@ -13,8 +13,9 @@ description:
   BOE TD4320 panels found in Xiaomi Redmi Note 7 and Xiaomi Mi 8 Lite
   smartphones. Without reset-gpios, the panel must already be initialized
   and powered by the bootloader. The driver then preserves the panel's
-  power, reset, backlight and command state while the display controller
-  starts its own scanout.
+  power, reset and command state while the display controller starts its
+  own scanout. The DRM panel core manages the referenced backlight in both
+  modes.
 
 allOf:
   - $ref: panel-common.yaml#

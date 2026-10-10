@@ -59,6 +59,24 @@ static const char * const POWER_SUPPLY_TYPE_TEXT[] = {
 	[POWER_SUPPLY_TYPE_APPLE_BRICK_ID]	= "BrickID",
 	[POWER_SUPPLY_TYPE_WIRELESS]		= "Wireless",
 	[POWER_SUPPLY_TYPE_BMS]			= "BMS",
+	[POWER_SUPPLY_TYPE_MAIN]			= "Main",
+	[POWER_SUPPLY_TYPE_USB_FLOAT]		= "USB_FLOAT",
+	[POWER_SUPPLY_TYPE_USB_HVDCP]		= "USB_HVDCP",
+	[POWER_SUPPLY_TYPE_USB_HVDCP_3]		= "USB_HVDCP_3",
+	[POWER_SUPPLY_TYPE_WIPOWER]		= "Wipower",
+};
+
+static const char * const POWER_SUPPLY_TYPEC_MODE_TEXT[] = {
+	"Nothing attached", "Sink attached", "Powered cable w/ sink",
+	"Debug Accessory", "Audio Adapter", "Powered cable w/o sink",
+	"Source attached (default current)",
+	"Source attached (medium current)",
+	"Source attached (high current)",
+	"Non compliant",
+};
+
+static const char * const POWER_SUPPLY_TYPEC_POWER_ROLE_TEXT[] = {
+	"none", "dual power role", "sink", "source"
 };
 
 static const char * const POWER_SUPPLY_USB_TYPE_TEXT[] = {
@@ -234,7 +252,11 @@ static struct power_supply_attr power_supply_attrs[] __ro_after_init = {
 	POWER_SUPPLY_ATTR(MANUFACTURER),
 	POWER_SUPPLY_ATTR(SERIAL_NUMBER),
 #define QCOM_POWER_SUPPLY_PROPERTY_ATTR(_name) POWER_SUPPLY_ATTR(_name),
-	QCOM_POWER_SUPPLY_PROPERTIES(QCOM_POWER_SUPPLY_PROPERTY_ATTR)
+	QCOM_POWER_SUPPLY_NON_ENUM_PROPERTIES(QCOM_POWER_SUPPLY_PROPERTY_ATTR)
+	POWER_SUPPLY_ENUM_ATTR(TYPEC_MODE),
+	POWER_SUPPLY_ENUM_ATTR(TYPEC_POWER_ROLE),
+	_POWER_SUPPLY_ENUM_ATTR(DIE_HEALTH, POWER_SUPPLY_HEALTH_TEXT),
+	_POWER_SUPPLY_ENUM_ATTR(REAL_TYPE, POWER_SUPPLY_TYPE_TEXT),
 #undef QCOM_POWER_SUPPLY_PROPERTY_ATTR
 };
 #define POWER_SUPPLY_ATTR_CNT ARRAY_SIZE(power_supply_attrs)

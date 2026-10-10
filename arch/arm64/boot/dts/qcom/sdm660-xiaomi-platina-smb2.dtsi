@@ -1,0 +1,199 @@
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * SMB2 nodes and charging parameters from Xiaomi platina downstream.
+ * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (C) 2018 XiaoMi, Inc.
+ */
+
+&pm660_charger {
+	compatible = "qcom,qpnp-smb2";
+	#address-cells = <1>;
+	#size-cells = <1>;
+	status = "okay";
+
+	/delete-property/ interrupts;
+	/delete-property/ interrupt-names;
+
+	qcom,pmic-revid = <&pm660_revid>;
+	io-channels = <&pm660_rradc 8>,
+		      <&pm660_rradc 3>,
+		      <&pm660_rradc 4>;
+	io-channel-names = "charger_temp", "usbin_i", "usbin_v";
+	/* Mainline RRADC does not provide charger_temp_max (channel 10). */
+	/* Mainline QUSB2 PHY does not provide the downstream DPDM regulator. */
+
+	qcom,wipower-max-uw = <5000000>;
+	qcom,auto-recharge-soc;
+
+	qcom,chgr@1000 {
+		reg = <0x1000 0x100>;
+		interrupts =
+			<0x0 0x10 0x0 IRQ_TYPE_EDGE_RISING>,
+			<0x0 0x10 0x1 IRQ_TYPE_EDGE_RISING>,
+			<0x0 0x10 0x2 IRQ_TYPE_EDGE_RISING>,
+			<0x0 0x10 0x3 IRQ_TYPE_EDGE_RISING>,
+			<0x0 0x10 0x4 IRQ_TYPE_EDGE_RISING>;
+
+		interrupt-names = "chg-error",
+				  "chg-state-change",
+				  "step-chg-state-change",
+				  "step-chg-soc-update-fail",
+				  "step-chg-soc-update-request";
+	};
+
+	qcom,otg@1100 {
+		reg = <0x1100 0x100>;
+		interrupts = <0x0 0x11 0x0 IRQ_TYPE_EDGE_BOTH>,
+			     <0x0 0x11 0x1 IRQ_TYPE_EDGE_BOTH>,
+			     <0x0 0x11 0x2 IRQ_TYPE_EDGE_BOTH>,
+			     <0x0 0x11 0x3 IRQ_TYPE_EDGE_BOTH>;
+
+		interrupt-names = "otg-fail",
+				  "otg-overcurrent",
+				  "otg-oc-dis-sw-sts",
+				  "testmode-change-detect";
+	};
+
+	qcom,bat-if@1200 {
+		reg = <0x1200 0x100>;
+		interrupts =
+			<0x0 0x12 0x0 IRQ_TYPE_EDGE_RISING>,
+			<0x0 0x12 0x1 IRQ_TYPE_EDGE_BOTH>,
+			<0x0 0x12 0x2 IRQ_TYPE_EDGE_BOTH>,
+			<0x0 0x12 0x3 IRQ_TYPE_EDGE_BOTH>,
+			<0x0 0x12 0x4 IRQ_TYPE_EDGE_BOTH>,
+			<0x0 0x12 0x5 IRQ_TYPE_EDGE_BOTH>;
+
+		interrupt-names = "bat-temp",
+				  "bat-ocp",
+				  "bat-ov",
+				  "bat-low",
+				  "bat-therm-or-id-missing",
+				  "bat-terminal-missing";
+	};
+
+	qcom,usb-chgpth@1300 {
+		reg = <0x1300 0x100>;
+		interrupts =
+			<0x0 0x13 0x0 IRQ_TYPE_EDGE_BOTH>,
+			<0x0 0x13 0x1 IRQ_TYPE_EDGE_BOTH>,
+			<0x0 0x13 0x2 IRQ_TYPE_EDGE_BOTH>,
+			<0x0 0x13 0x3 IRQ_TYPE_EDGE_BOTH>,
+			<0x0 0x13 0x4 IRQ_TYPE_EDGE_BOTH>,
+			<0x0 0x13 0x5 IRQ_TYPE_EDGE_RISING>,
+			<0x0 0x13 0x6 IRQ_TYPE_EDGE_RISING>,
+			<0x0 0x13 0x7 IRQ_TYPE_EDGE_RISING>;
+
+		interrupt-names = "usbin-collapse",
+				  "usbin-lt-3p6v",
+				  "usbin-uv",
+				  "usbin-ov",
+				  "usbin-plugin",
+				  "usbin-src-change",
+				  "usbin-icl-change",
+				  "type-c-change";
+	};
+
+	qcom,dc-chgpth@1400 {
+		reg = <0x1400 0x100>;
+		interrupts =
+			<0x0 0x14 0x0 IRQ_TYPE_EDGE_BOTH>,
+			<0x0 0x14 0x1 IRQ_TYPE_EDGE_BOTH>,
+			<0x0 0x14 0x2 IRQ_TYPE_EDGE_BOTH>,
+			<0x0 0x14 0x3 IRQ_TYPE_EDGE_BOTH>,
+			<0x0 0x14 0x4 IRQ_TYPE_EDGE_BOTH>,
+			<0x0 0x14 0x5 IRQ_TYPE_EDGE_BOTH>,
+			<0x0 0x14 0x6 IRQ_TYPE_EDGE_RISING>;
+
+		interrupt-names = "dcin-collapse",
+				  "dcin-lt-3p6v",
+				  "dcin-uv",
+				  "dcin-ov",
+				  "dcin-plugin",
+				  "div2-en-dg",
+				  "dcin-icl-change";
+	};
+
+	qcom,chgr-misc@1600 {
+		reg = <0x1600 0x100>;
+		interrupts =
+			<0x0 0x16 0x0 IRQ_TYPE_EDGE_RISING>,
+			<0x0 0x16 0x1 IRQ_TYPE_EDGE_RISING>,
+			<0x0 0x16 0x2 IRQ_TYPE_EDGE_BOTH>,
+			<0x0 0x16 0x3 IRQ_TYPE_EDGE_BOTH>,
+			<0x0 0x16 0x4 IRQ_TYPE_EDGE_BOTH>,
+			<0x0 0x16 0x5 IRQ_TYPE_EDGE_BOTH>,
+			<0x0 0x16 0x6 IRQ_TYPE_EDGE_FALLING>,
+			<0x0 0x16 0x7 IRQ_TYPE_EDGE_BOTH>;
+
+		interrupt-names = "wdog-snarl",
+				  "wdog-bark",
+				  "aicl-fail",
+				  "aicl-done",
+				  "high-duty-cycle",
+				  "input-current-limiting",
+				  "temperature-change",
+				  "switcher-power-ok";
+	};
+};
+
+&tlmm {
+	/* d2t don't support reverse boost, set gpio20 to in/down */
+	boost_en_disable: boost_en_disable {
+		/* diable state */
+		mux {
+			pins = "gpio20";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio20";
+			bias-pull-down; /* PULL DOWN */
+			drive-strength = <2>; /* 2 MA */
+			input-enable;
+		};
+	};
+};
+
+&pm660_charger {
+	qcom,usb-icl-ua = <2750000>;
+	qcom,fcc-max-ua = <3000000>;
+	qcom,fv-max-uv = <4400000>;
+	qcom,sw-jeita-enable;
+	qcom,cool-fcc-ua = <975000>;
+	qcom,critical-low-fcc-ua = <325000>;
+	qcom,normal-cool-fcc-ua = <2275000>;
+	qcom,warm-fcc-ua = <1625000>;
+	qcom,supprot-5v-2a;
+	qcom,use-usbmid;
+	pinctrl-names = "default";
+	pinctrl-0 = <&boost_en_disable>;
+	qcom,thermal-mitigation
+				= <2000000 1800000 1600000 1400000 1200000 1000000 1000000>;
+	qcom,thermal-mitigation-dcp
+				= <2000000 2000000 2000000 2000000 2000000 2000000 2000000
+				   2000000 1800000 1700000 1600000 1400000 1200000 1000000
+				   1000000 1000000>;
+	qcom,thermal-mitigation-qc3
+				= <2750000 2450000 2200000 2150000 2100000 1950000 1825000
+				   1725000 1550000 1250000 1150000 1000000 900000 800000
+				   750000 525000>;
+	qcom,thermal-mitigation-qc2
+				= <1500000 1500000 1500000 1500000 1425000 1325000 1275000
+				   1225000 1175000 1125000 1025000 925000 825000 725000
+				   625000 525000>;
+	qcom,thermal-mitigation-pd-base
+				= <3000000 2800000 2600000 2400000 2200000 2000000 1800000
+				   1600000 1600000 1400000 1200000 1100000 1000000 900000
+				   752500 525000>;
+};
+
+&pm660_charger {
+	smb2_vbus: qcom,smb2-vbus {
+		regulator-name = "smb2-vbus";
+	};
+
+	smb2_vconn: qcom,smb2-vconn {
+		regulator-name = "smb2-vconn";
+	};
+};
