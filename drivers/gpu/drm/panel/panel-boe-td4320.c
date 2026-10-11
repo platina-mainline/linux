@@ -344,7 +344,7 @@ static int boe_td4320_prepare(struct drm_panel *panel)
 
 	if (ctx->preserve_bootloader) {
 		dev_info(dev,
-			 "PANEL KEEP: prepare, preserving bootloader supplies/reset/commands/backlight\n");
+			 "PANEL KEEP: prepare, preserving bootloader supplies/reset/commands\n");
 		return 0;
 	}
 
@@ -502,17 +502,17 @@ static int boe_td4320_probe(struct mipi_dsi_device *dsi)
 
 	ctx->panel.prepare_prev_first = true;
 
-	/* The panel core otherwise switches WLED in enable/disable callbacks. */
-	if (!ctx->preserve_bootloader) {
-		ret = drm_panel_of_backlight(&ctx->panel);
-		if (ret) {
-			/* -EPROBE_DEFER: backlight provider not bound yet. */
-			dev_err(dev, "Failed to get backlight: %d\n", ret);
-			return ret;
-		}
-	} else {
+	/* Let the panel core manage backlight even with bootloader panel setup. */
+	ret = drm_panel_of_backlight(&ctx->panel);
+	if (ret) {
+		/* -EPROBE_DEFER: backlight provider not bound yet. */
+		dev_err(dev, "Failed to get backlight: %d\n", ret);
+		return ret;
+	}
+
+	if (ctx->preserve_bootloader) {
 		dev_info(dev,
-			 "PANEL KEEP: probe, using bootloader state; no panel hardware operations\n");
+			 "PANEL KEEP: probe, preserving bootloader supplies/reset/commands; DRM manages backlight\n");
 	}
 
 	drm_panel_add(&ctx->panel);

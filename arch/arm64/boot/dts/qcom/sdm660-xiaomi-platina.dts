@@ -10,6 +10,8 @@
 #include "sdm660.dtsi"
 #include "pm660.dtsi"
 #include "pm660l.dtsi"
+#include "sdm660-xiaomi-platina-fg.dtsi"
+#include "sdm660-xiaomi-platina-smb2.dtsi"
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/input/input.h>
 #include <dt-bindings/input/gpio-keys.h>
@@ -271,7 +273,23 @@
 };
 
 &adreno_gpu {
+	power-domains = <&gfx_pd>;
 	status = "okay";
+};
+
+&gfx_pd {
+	status = "okay";
+};
+
+&gpu_sdm660_opp_table {
+	opp-160000000 {
+		opp-level = <RPM_SMD_LEVEL_LOW_SVS>;
+	};
+};
+
+&kgsl_smmu {
+	/* Keep GFX supply votes until both the GPU and its SMMU are idle. */
+	power-domains = <&gfx_pd>;
 };
 
 &blsp_i2c2 {
@@ -297,6 +315,35 @@
 
 &blsp_i2c4 {
 	status = "okay";
+
+	touchscreen@20 {
+		compatible = "synaptics,tcm-i2c";
+		reg = <0x20>;
+		panel = <&panel>;
+
+		interrupts-extended = <&tlmm 67 IRQ_TYPE_LEVEL_LOW>;
+		synaptics,irq-gpios = <&tlmm 67 GPIO_ACTIVE_LOW>;
+		synaptics,irq-on-state = <0>;
+		synaptics,reset-gpios = <&tlmm 66 GPIO_ACTIVE_LOW>;
+		synaptics,reset-on-state = <0>;
+		synaptics,reset-active-ms = <20>;
+		synaptics,reset-delay-ms = <200>;
+		synaptics,power-delay-ms = <200>;
+		synaptics,ubl-i2c-addr = <0x2c>;
+
+		vdd-supply = <&vreg_l11a_1p8>;
+		lab-supply = <&lcdb_ldo_vreg>;
+		ibb-supply = <&lcdb_ncp_vreg>;
+		i2c-supply = <&vreg_l14a_1p8>;
+		synaptics,bus-reg-name = "vdd";
+		synaptics,lab-reg-name = "lab";
+		synaptics,ibb-reg-name = "ibb";
+		synaptics,i2c-reg-name = "i2c";
+
+		pinctrl-names = "pmx_ts_active", "pmx_ts_suspend";
+		pinctrl-0 = <&ts_int_active &ts_tcm_reset_active>;
+		pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
+	};
 
 	touchscreen@1 {
 		/* Probe changes reset/shared IOVCC, disrupting bootloader display. */
@@ -334,6 +381,8 @@
 };
 
 &gpucc {
+	/* The BHS controller owns the separate GFX LDO register block. */
+	reg = <0x05065000 0x2000>;
 	status = "okay";
 };
 
@@ -928,6 +977,27 @@
 		function = "gpio";
 		drive-strength = <16>;
 		bias-pull-up;
+	};
+
+	ts_tcm_reset_active: ts-tcm-reset-active-state {
+		pins = "gpio66";
+		function = "gpio";
+		drive-strength = <16>;
+		bias-pull-up;
+	};
+
+	ts_reset_suspend: ts-reset-suspend-state {
+		pins = "gpio66";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-pull-down;
+	};
+
+	ts_int_suspend: ts-int-suspend-state {
+		pins = "gpio67";
+		function = "gpio";
+		drive-strength = <2>;
+		bias-disable;
 	};
 
 	ts_vdd_default: ts-vdd-default-state {

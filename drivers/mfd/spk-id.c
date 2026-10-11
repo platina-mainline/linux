@@ -181,6 +181,7 @@ static const struct of_device_id spk_id_match[] = {
 	{.compatible = "audio,speaker-id"},
 	{}
 };
+MODULE_DEVICE_TABLE(of, spk_id_match);
 
 static struct platform_driver spk_id_driver = {
 	.driver = {

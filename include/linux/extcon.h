@@ -19,6 +19,7 @@
 #define __LINUX_EXTCON_H__
 
 #include <linux/device.h>
+#include <linux/power/qcom/extcon-extensions.h>
 
 /*
  * Define the type of supported external connectors

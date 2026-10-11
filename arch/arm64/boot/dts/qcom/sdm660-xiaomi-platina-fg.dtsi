@@ -1,0 +1,117 @@
+// SPDX-License-Identifier: GPL-2.0-only
+/* FG GEN3 nodes and battery profiles from Xiaomi platina downstream. */
+
+/delete-node/ &pm660_fg;
+
+&spmi_bus {
+	pmic@0 {
+		pm660_revid: revid@100 {
+			compatible = "qcom,qpnp-revid";
+			reg = <0x100>;
+			qcom,fab-id-valid;
+			qcom,tp-rev-valid;
+		};
+
+		pm660_fg: qpnp,fg {
+			compatible = "qcom,fg-gen3";
+			#address-cells = <1>;
+			#size-cells = <1>;
+			qcom,pmic-revid = <&pm660_revid>;
+			io-channels = <&pm660_rradc 0>,
+				      <&pm660_rradc 7>;
+			io-channel-names = "rradc_batt_id",
+					   "rradc_die_temp";
+			qcom,rradc-base = <0x4500>;
+			qcom,fg-esr-timer-awake = <96 96>;
+			qcom,fg-esr-timer-asleep = <256 256>;
+			qcom,fg-esr-timer-charging = <0 96>;
+			qcom,cycle-counter-en;
+			status = "okay";
+
+			qcom,fg-batt-soc@4000 {
+				status = "okay";
+				reg = <0x4000 0x100>;
+				interrupts = <0x0 0x40 0x0 IRQ_TYPE_EDGE_BOTH>,
+					     <0x0 0x40 0x1 IRQ_TYPE_EDGE_BOTH>,
+					     <0x0 0x40 0x2
+							IRQ_TYPE_EDGE_RISING>,
+					     <0x0 0x40 0x3
+							IRQ_TYPE_EDGE_RISING>,
+					     <0x0 0x40 0x4 IRQ_TYPE_EDGE_BOTH>,
+					     <0x0 0x40 0x5
+							IRQ_TYPE_EDGE_RISING>,
+					     <0x0 0x40 0x6 IRQ_TYPE_EDGE_BOTH>,
+					     <0x0 0x40 0x7 IRQ_TYPE_EDGE_BOTH>;
+				interrupt-names = "soc-update",
+						  "soc-ready",
+						  "bsoc-delta",
+						  "msoc-delta",
+						  "msoc-low",
+						  "msoc-empty",
+						  "msoc-high",
+						  "msoc-full";
+			};
+
+			qcom,fg-batt-info@4100 {
+				status = "okay";
+				reg = <0x4100 0x100>;
+				interrupts = <0x0 0x41 0x0 IRQ_TYPE_EDGE_BOTH>,
+					     <0x0 0x41 0x1 IRQ_TYPE_EDGE_BOTH>,
+					     <0x0 0x41 0x2 IRQ_TYPE_EDGE_BOTH>,
+					     <0x0 0x41 0x3 IRQ_TYPE_EDGE_BOTH>,
+					     <0x0 0x41 0x6 IRQ_TYPE_EDGE_BOTH>;
+				interrupt-names = "vbatt-pred-delta",
+						  "vbatt-low",
+						  "esr-delta",
+						  "batt-missing",
+						  "batt-temp-delta";
+			};
+
+			qcom,fg-memif@4400 {
+				status = "okay";
+				reg = <0x4400 0x100>;
+				interrupts = <0x0 0x44 0x0 IRQ_TYPE_EDGE_BOTH>,
+					     <0x0 0x44 0x1 IRQ_TYPE_EDGE_BOTH>,
+					     <0x0 0x44 0x2 IRQ_TYPE_EDGE_BOTH>;
+				interrupt-names = "ima-rdy",
+						  "mem-xcp",
+						  "dma-grant";
+			};
+		};
+	};
+};
+
+&pm660_rradc {
+	status = "okay";
+};
+
+/{
+	mtp_batterydata: qcom,battery-data {
+		qcom,batt-id-range-pct = <15>;
+		#include "batterydata-D2T-coslight-3350mAh.dtsi"
+		#include "batterydata-D2T-desay-3350mAh.dtsi"
+		#include "fg-gen3-batterydata-itech-3000mah.dtsi"
+	};
+};
+
+&pm660_fg {
+	qcom,battery-data = <&mtp_batterydata>;
+	qcom,fg-force-load-profile;
+	qcom,fg-sys-term-current = <(-300)>;
+	qcom,fg-chg-term-current = <200>;
+	qcom,fg-recharge-soc-thr = <99>;
+	qcom,fg-cutoff-voltage = <3400>;
+	qcom,fg-empty-voltage = <3100>;
+	qcom,fg-jeita-hyst-temp = <0>;
+	qcom,fg-jeita-thresholds = <0 15 45 58>;
+	qcom,fg-batt-temp-delta = <6>;
+	qcom,fg-esr-clamp-mohms = <60>;
+	qcom,fg-cutoff-current = <200>;
+	qcom,slope-limit-temp-threshold = <100>;
+	qcom,slope-limit-coeffs = <10 11 12 13>;
+};
+
+
+&pm660_fg {
+	qcom,fg-auto-recharge-soc;
+};

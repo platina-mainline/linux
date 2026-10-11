@@ -40,6 +40,47 @@
 	};
 };
 
+&soc {
+	gfx_pd: power-controller@506e000 {
+		compatible = "qcom,sdm660-gfx-bhs";
+		reg = <0x0506e000 0x34>, <0x01fcf004 0x4>;
+		reg-names = "bhs", "mem-acc";
+		#power-domain-cells = <0>;
+		power-domains = <&rpmpd RPMPD_VDDCX>,
+				<&rpmpd RPMPD_VDDMX>,
+				<&gpucc GPU_GX_GDSC>;
+		power-domain-names = "cx", "mx", "gx";
+		operating-points-v2 = <&gfx_opp_table>;
+		status = "disabled";
+
+		gfx_opp_table: opp-table {
+			compatible = "operating-points-v2";
+
+			opp-48 {
+				opp-level = <RPM_SMD_LEVEL_MIN_SVS>;
+			};
+			opp-64 {
+				opp-level = <RPM_SMD_LEVEL_LOW_SVS>;
+			};
+			opp-128 {
+				opp-level = <RPM_SMD_LEVEL_SVS>;
+			};
+			opp-192 {
+				opp-level = <RPM_SMD_LEVEL_SVS_PLUS>;
+			};
+			opp-256 {
+				opp-level = <RPM_SMD_LEVEL_NOM>;
+			};
+			opp-320 {
+				opp-level = <RPM_SMD_LEVEL_NOM_PLUS>;
+			};
+			opp-384 {
+				opp-level = <RPM_SMD_LEVEL_TURBO>;
+			};
+		};
+	};
+};
+
 &adreno_gpu {
 	compatible = "qcom,adreno-512.0", "qcom,adreno";
 	operating-points-v2 = <&gpu_sdm660_opp_table>;
