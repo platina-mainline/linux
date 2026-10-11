@@ -1,6 +1,19 @@
 # SPDX-License-Identifier: GPL-2.0-only
 menu "Qualcomm PM Domains"
 
+config QCOM_SDM660_GFX
+	bool "Qualcomm SDM660 GFX BHS power domain"
+	depends on (ARCH_QCOM || COMPILE_TEST) && HAS_IOMEM
+	depends on QCOM_RPMPD=y
+	select PM_OPP
+	select REGMAP
+	help
+	  Manage the SDM660 GPU supply in BHS mode, with CX performance
+	  states, the MX vote required by GPU PLLs, and MEM ACC switching.
+	  The GX and CX GDSCs are enabled only after their supplies are ready.
+	  This supports boards which disable GFX LDO operation and CPR
+	  closed-loop control, such as Xiaomi platina.
+
 config QCOM_CPR
 	tristate "Qualcomm Core Power Reduction (CPR) support"
 	depends on (ARCH_QCOM || COMPILE_TEST) && HAS_IOMEM

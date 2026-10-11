@@ -1349,3 +1349,15 @@ module_exit(touch_module_exit);
 MODULE_AUTHOR("Synaptics, Inc.");
 MODULE_DESCRIPTION("Synaptics TCM Touch Module");
 MODULE_LICENSE("GPL v2");
+
+/* Load the reporting module so its core and bus dependencies also initialize. */
+#if IS_ENABLED(CONFIG_TOUCHSCREEN_SYNAPTICS_TCM_I2C)
+MODULE_ALIAS("of:N*T*Csynaptics,tcm-i2c");
+MODULE_ALIAS("of:N*T*Csynaptics,tcm-i2cC*");
+MODULE_ALIAS("i2c:synaptics_tcm_i2c");
+#endif
+#if IS_ENABLED(CONFIG_TOUCHSCREEN_SYNAPTICS_TCM_SPI)
+MODULE_ALIAS("of:N*T*Csynaptics,tcm-spi");
+MODULE_ALIAS("of:N*T*Csynaptics,tcm-spiC*");
+MODULE_ALIAS("spi:synaptics_tcm_spi");
+#endif

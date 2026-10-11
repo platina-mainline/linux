@@ -58,8 +58,13 @@ static int disable_pwrrail(struct msm_gpu *gpu)
 
 static int enable_clk(struct msm_gpu *gpu)
 {
-	if (gpu->core_clk && gpu->fast_rate)
-		dev_pm_opp_set_rate(&gpu->pdev->dev, gpu->fast_rate);
+	int ret;
+
+	if (gpu->core_clk && gpu->fast_rate) {
+		ret = dev_pm_opp_set_rate(&gpu->pdev->dev, gpu->fast_rate);
+		if (ret)
+			return ret;
+	}
 
 	/* Set the RBBM timer rate to 19.2Mhz */
 	if (gpu->rbbmtimer_clk)
@@ -110,17 +115,23 @@ int msm_gpu_pm_resume(struct msm_gpu *gpu)
 
 	ret = enable_clk(gpu);
 	if (ret)
-		return ret;
+		goto disable_pwrrail;
 
 	ret = enable_axi(gpu);
 	if (ret)
-		return ret;
+		goto disable_clk;
 
 	msm_devfreq_resume(gpu);
 
 	gpu->needs_hw_init = true;
 
 	return 0;
+
+disable_clk:
+	disable_clk(gpu);
+disable_pwrrail:
+	disable_pwrrail(gpu);
+	return ret;
 }
 
 int msm_gpu_pm_suspend(struct msm_gpu *gpu)

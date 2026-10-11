@@ -22,6 +22,7 @@ static int msm_devfreq_target(struct device *dev, unsigned long *freq,
 	struct msm_gpu *gpu = dev_to_gpu(dev);
 	struct msm_gpu_devfreq *df = &gpu->devfreq;
 	struct dev_pm_opp *opp;
+	int ret = 0;
 
 	/*
 	 * Note that devfreq_recommended_opp() can modify the freq
@@ -48,12 +49,12 @@ static int msm_devfreq_target(struct device *dev, unsigned long *freq,
 		gpu->funcs->gpu_set_freq(gpu, opp, df->suspended);
 		mutex_unlock(&df->lock);
 	} else {
-		dev_pm_opp_set_rate(dev, *freq);
+		ret = dev_pm_opp_set_rate(dev, *freq);
 	}
 
 	dev_pm_opp_put(opp);
 
-	return 0;
+	return ret;
 }
 
 static unsigned long get_freq(struct msm_gpu *gpu)

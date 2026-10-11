@@ -273,7 +273,23 @@
 };
 
 &adreno_gpu {
+	power-domains = <&gfx_pd>;
 	status = "okay";
+};
+
+&gfx_pd {
+	status = "okay";
+};
+
+&gpu_sdm660_opp_table {
+	opp-160000000 {
+		opp-level = <RPM_SMD_LEVEL_LOW_SVS>;
+	};
+};
+
+&kgsl_smmu {
+	/* Keep GFX supply votes until both the GPU and its SMMU are idle. */
+	power-domains = <&gfx_pd>;
 };
 
 &blsp_i2c2 {
@@ -365,6 +381,8 @@
 };
 
 &gpucc {
+	/* The BHS controller owns the separate GFX LDO register block. */
+	reg = <0x05065000 0x2000>;
 	status = "okay";
 };
 
